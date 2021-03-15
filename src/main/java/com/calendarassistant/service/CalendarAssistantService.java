@@ -71,7 +71,6 @@ public class CalendarAssistantService implements ICalendarAssistantService {
 
   @Override
   public AvailableMeetingSlotResponse getAvailableSlots(ResolveMeetingResponse request) {
-    System.out.println("In AvailableMeetingSlot");
     AvailableMeetingSlotResponse response = new AvailableMeetingSlotResponse();
     List<Meeting> meetings = request.getMeetings();
     List<TimeSlot> availableSlots = new ArrayList<>();
@@ -79,8 +78,6 @@ public class CalendarAssistantService implements ICalendarAssistantService {
     for (i = 1; i < meetings.size(); i++) {
       Date avaiableTimeSlotStart = meetings.get(i - 1).getTimeSlot().getMeetingEndDateTime();
       Date avaiableTimeSlotEnd = meetings.get(i).getTimeSlot().getMeetingStartDateTime();
-      System.out.println(avaiableTimeSlotStart);
-      System.out.println(avaiableTimeSlotEnd);
       if (avaiableTimeSlotEnd.after(avaiableTimeSlotStart)) {
         TimeSlot timeSlot = new TimeSlot(avaiableTimeSlotStart, avaiableTimeSlotEnd);
         availableSlots.add(timeSlot);
@@ -100,31 +97,52 @@ public class CalendarAssistantService implements ICalendarAssistantService {
     List<TimeSlot> availableSlots = new ArrayList<>();
     TimeSlot availableSlot = null;
     int i;
-    getAvailableTimeSlots(firstTimeSlot, availableSlots);
-    getAvailableTimeSlots(secondTimeSlot, availableSlots);
-
+    getAvailableTimeSlots(firstTimeSlot, secondTimeSlot, availableSlots);
     for (i = 1; i < availableSlots.size(); i++) {
       Date end = availableSlots.get(i - 1).getMeetingEndDateTime();
       Date start = availableSlots.get(i).getMeetingStartDateTime();
       if (end.after(start)
-          && Duration.between(end.toInstant(), start.toInstant()).getSeconds()
+          && Duration.between(start.toInstant(), end.toInstant()).getSeconds()
               >= (request.getDurationInMinutes() * 60)) {
         availableSlot = new TimeSlot(start, end);
+        break;
       }
     }
     response.setAvailableTimeSlot(availableSlot);
     return response;
   }
 
-  private void getAvailableTimeSlots(List<TimeSlot> timeSlots, List<TimeSlot> availableSlots) {
-    int i;
-    for (i = 1; i < timeSlots.size(); i++) {
-      Date avaiableTimeSlotStart = timeSlots.get(i - 1).getMeetingEndDateTime();
-      Date avaiableTimeSlotEnd = timeSlots.get(i).getMeetingStartDateTime();
-      if (avaiableTimeSlotStart.compareTo(avaiableTimeSlotEnd) > 0) {
-        TimeSlot timeSlot = new TimeSlot(avaiableTimeSlotStart, avaiableTimeSlotEnd);
-        availableSlots.add(timeSlot);
+  private void getAvailableTimeSlots(
+      List<TimeSlot> firstTimeSlot, List<TimeSlot> secondTimeSlot, List<TimeSlot> availableSlots) {
+    int i = 1;
+    int j = 1;
+    while (i < firstTimeSlot.size() || j < secondTimeSlot.size()) {
+      if (i == firstTimeSlot.size()) {
+        checkToAddInTimeSlot(secondTimeSlot.get(j - 1), secondTimeSlot.get(j), availableSlots);
+        j++;
+      } else if (j == secondTimeSlot.size()) {
+        checkToAddInTimeSlot(firstTimeSlot.get(i - 1), firstTimeSlot.get(i), availableSlots);
+        i++;
+      } else if (firstTimeSlot
+          .get(i - 1)
+          .getMeetingEndDateTime()
+          .before(secondTimeSlot.get(j - 1).getMeetingEndDateTime())) {
+        checkToAddInTimeSlot(firstTimeSlot.get(i - 1), firstTimeSlot.get(i), availableSlots);
+        i++;
+      } else {
+        checkToAddInTimeSlot(secondTimeSlot.get(j - 1), secondTimeSlot.get(j), availableSlots);
+        j++;
       }
+    }
+  }
+
+  private void checkToAddInTimeSlot(
+      TimeSlot availableSlotStart, TimeSlot availableSlotEnd, List<TimeSlot> availableSlots) {
+    Date avaiableTimeSlotStart = availableSlotStart.getMeetingEndDateTime();
+    Date avaiableTimeSlotEnd = availableSlotEnd.getMeetingStartDateTime();
+    if (avaiableTimeSlotStart.before(avaiableTimeSlotEnd)) {
+      TimeSlot timeSlot = new TimeSlot(avaiableTimeSlotStart, avaiableTimeSlotEnd);
+      availableSlots.add(timeSlot);
     }
   }
 
@@ -182,11 +200,11 @@ public class CalendarAssistantService implements ICalendarAssistantService {
     int meetingFirstWeight = 0;
     int meetingSecondWeight = 0;
     for (Employee e : first.getEmployees()) {
-      meetingFirstWeight += ranks.indexOf(e.getRank());
+      meetingFirstWeight += ranks.indexOf(e.getRank().toUpperCase());
     }
 
     for (Employee e : second.getEmployees()) {
-      meetingSecondWeight += ranks.indexOf(e.getRank());
+      meetingSecondWeight += ranks.indexOf(e.getRank().toUpperCase());
     }
 
     if (meetingFirstWeight > meetingSecondWeight) {

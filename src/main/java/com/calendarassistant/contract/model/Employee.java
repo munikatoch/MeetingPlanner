@@ -3,6 +3,7 @@ package com.calendarassistant.contract.model;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import com.calendarassistant.utils.CustomRankValidator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Employee {
@@ -13,6 +14,7 @@ public class Employee {
   private String fullName;
 
   @JsonProperty("rank")
+  @CustomRankValidator
   private String rank = "DEVELOPER";
 
   public String getFullName() {
@@ -27,7 +29,7 @@ public class Employee {
     return rank;
   }
 
-  public void setRank(String rank) {
+  public void setRank(@CustomRankValidator String rank) {
     this.rank = rank;
   }
 
