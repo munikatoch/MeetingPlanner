@@ -49,6 +49,7 @@ public class Meeting {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((employees == null) ? 0 : employees.hashCode());
     result = prime * result + ((organizer == null) ? 0 : organizer.hashCode());
     result = prime * result + ((timeSlot == null) ? 0 : timeSlot.hashCode());
     return result;
@@ -60,6 +61,9 @@ public class Meeting {
     if (obj == null) return false;
     if (getClass() != obj.getClass()) return false;
     Meeting other = (Meeting) obj;
+    if (employees == null) {
+      if (other.employees != null) return false;
+    } else if (!employees.containsAll(other.employees)) return false;
     if (organizer == null) {
       if (other.organizer != null) return false;
     } else if (!organizer.equals(other.organizer)) return false;
