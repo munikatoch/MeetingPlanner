@@ -11,8 +11,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.calendarassistant.contract.interfaces.ICalendarAssistantService;
+import com.calendarassistant.contract.messages.AvailableMeetingSlotResponse;
 import com.calendarassistant.contract.messages.MeetingConflictsRequest;
 import com.calendarassistant.contract.messages.MeetingConflictsResponse;
+import com.calendarassistant.contract.messages.ResolveMeetingRequest;
+import com.calendarassistant.contract.messages.ResolveMeetingResponse;
 import com.calendarassistant.contract.model.Employee;
 import com.calendarassistant.contract.model.Meeting;
 import com.calendarassistant.contract.model.TimeSlot;
@@ -32,8 +35,61 @@ public class CalendarAssistantServiceTest {
     MeetingConflictsRequest request = createMeetingConflictsRequest();
     MeetingConflictsResponse actual = service.getMeetingConflicts(request);
     MeetingConflictsResponse expected = createMeetingConflictsResponse();
-    Assert.assertNotNull(actual);
-    Assert.assertTrue(expected.getMeetings().containsAll(actual.getMeetings()));
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testResolveMeetings() {
+    ResolveMeetingRequest request = createResolveMeetingRequest();
+    ResolveMeetingResponse actual = service.getResolvedMeetings(request);
+    ResolveMeetingResponse expected = createResolveMeetingResponse();
+    Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testAvailableMeetingSlot() {
+    ResolveMeetingResponse request = createResolveMeetingResponse();
+    AvailableMeetingSlotResponse actual = service.getAvailableSlots(request);
+    AvailableMeetingSlotResponse expected = createAvailableMeetingSlotResponse();
+    Assert.assertEquals(expected, actual);
+  }
+
+  private AvailableMeetingSlotResponse createAvailableMeetingSlotResponse() {
+    AvailableMeetingSlotResponse response = new AvailableMeetingSlotResponse();
+    List<TimeSlot> timeSlots = new ArrayList<TimeSlot>();
+    timeSlots.add(getTimeSlot("2022-03-16 11:15AM", "2022-03-16 01:15PM"));
+    timeSlots.add(getTimeSlot("2022-03-16 02:15PM", "2022-03-16 04:15PM"));
+    response.setTimeSlots(timeSlots);
+    return response;
+  }
+
+  //  private void objectToString(Object actual, Object expected) {
+  //    String a = "", e = "";
+  //    try {
+  //      a = new ObjectMapper().writeValueAsString(actual);
+  //      e = new ObjectMapper().writeValueAsString(expected);
+  //    } catch (JsonProcessingException ex) {
+  //      ex.printStackTrace();
+  //    }
+  //    System.out.println();
+  //  }
+
+  private ResolveMeetingResponse createResolveMeetingResponse() {
+    ResolveMeetingResponse response = new ResolveMeetingResponse();
+    List<Meeting> meetings = new ArrayList<>();
+    meetings.add(createMeetingOne());
+    meetings.add(createMeetingFour());
+    meetings.add(createMeetingSix());
+    meetings.add(createMeetingEight());
+    response.setMeetings(meetings);
+    return response;
+  }
+
+  private ResolveMeetingRequest createResolveMeetingRequest() {
+    ResolveMeetingRequest request = new ResolveMeetingRequest();
+    request.setOwner(createDeveloperEmployee());
+    request.setMeetings(createMeetingList());
+    return request;
   }
 
   private MeetingConflictsResponse createMeetingConflictsResponse() {
@@ -42,7 +98,7 @@ public class CalendarAssistantServiceTest {
     meetings.add(createMeetingTwo());
     meetings.add(createMeetingFour());
     meetings.add(createMeetingSix());
-    meetings.add(createMeetingSeven());
+    meetings.add(createMeetingEight());
     response.setMeetings(meetings);
     return response;
   }
@@ -68,7 +124,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingOne() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 08:53AM", "2021-03-16 10:15AM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 08:53AM", "2022-03-16 10:15AM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createDeveloperEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -77,7 +133,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingTwo() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 08:15AM", "2021-03-16 09:15AM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 08:15AM", "2022-03-16 09:15AM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createDirectorEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -86,7 +142,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingThree() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 10:15AM", "2021-03-16 11:15AM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 10:15AM", "2022-03-16 11:15AM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createManagerEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -95,7 +151,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingFour() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 10:15AM", "2021-03-16 11:15AM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 10:15AM", "2022-03-16 11:15AM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createCEOEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -104,7 +160,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingFive() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 01:15PM", "2021-03-16 02:15PM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 01:15PM", "2022-03-16 02:15PM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createManagerEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -113,7 +169,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingSix() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 01:15PM", "2021-03-16 02:15PM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 01:15PM", "2022-03-16 02:15PM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createManagerEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -124,7 +180,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingSeven() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 04:15PM", "2021-03-16 05:15PM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 04:15PM", "2022-03-16 05:15PM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createManagerEmployee());
     meeting.setTimeSlot(timeSlot);
@@ -135,7 +191,7 @@ public class CalendarAssistantServiceTest {
   }
 
   private Meeting createMeetingEight() {
-    TimeSlot timeSlot = getTimeSlot("2021-03-16 04:15PM", "2021-03-16 05:15PM");
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 04:15PM", "2022-03-16 05:15PM");
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createManagerEmployee());
     meeting.setTimeSlot(timeSlot);
