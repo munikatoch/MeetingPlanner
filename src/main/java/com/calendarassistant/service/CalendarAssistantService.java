@@ -183,6 +183,8 @@ public class CalendarAssistantService implements ICalendarAssistantService {
   private boolean resolve(Meeting first, Meeting second, Employee owner) {
     Meeting meeting = resolveForOrganizer(first, second, owner);
     if (meeting != null) {
+      System.out.print("Organizer resolve : ");
+      System.out.println(meeting.equals(first));
       return meeting.equals(first);
     }
     meeting = resolveForRank(first, second);
@@ -230,9 +232,12 @@ public class CalendarAssistantService implements ICalendarAssistantService {
   }
 
   private Meeting resolveForOrganizer(Meeting first, Meeting second, Employee owner) {
+    System.out.println(owner.getFullName() + " " + owner.getRank());
     if (first.getOrganizer().equals(owner)) {
+      System.out.println("First");
       return first;
     } else if (second.getOrganizer().equals(owner)) {
+      System.out.println("Second");
       return second;
     } else {
       return null;

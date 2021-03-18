@@ -50,10 +50,10 @@ public class Employee {
     Employee other = (Employee) obj;
     if (fullName == null) {
       if (other.fullName != null) return false;
-    } else if (!fullName.equals(other.fullName)) return false;
+    } else if (!fullName.equalsIgnoreCase(other.fullName)) return false;
     if (rank == null) {
       if (other.rank != null) return false;
-    } else if (!rank.equals(other.rank)) return false;
+    } else if (!rank.equalsIgnoreCase(other.rank)) return false;
     return true;
   }
 }

@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -25,12 +26,9 @@ import com.calendarassistant.contract.model.TimeSlot;
 import com.calendarassistant.controller.MeetingAssistantController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/*
- * This test case class is not working. Did some research but could find anything.
- */
-
-@WebMvcTest(controllers = MeetingAssistantController.class)
+@WebMvcTest(MeetingAssistantController.class)
 public class MeetingAssistantControllerTest {
+
   @Autowired private MockMvc mockMvc;
 
   @Autowired private ObjectMapper objectMapper;
@@ -41,11 +39,12 @@ public class MeetingAssistantControllerTest {
   public void getConflictMeetingResponseWithOkStatus() throws Exception {
     MeetingConflictsRequest request = createMeetingConflictsRequest();
     MeetingConflictsResponse expected = createMeetingConflictsResponse();
-    Mockito.when(service.getMeetingConflicts(ArgumentMatchers.isA(MeetingConflictsRequest.class)))
+    Mockito.when(service.getMeetingConflicts(ArgumentMatchers.any(MeetingConflictsRequest.class)))
         .thenReturn(expected);
     this.mockMvc
         .perform(
             MockMvcRequestBuilders.post("/meeting/conflicts")
+                .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(expected)));
