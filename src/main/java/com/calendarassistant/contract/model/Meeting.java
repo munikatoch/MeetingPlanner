@@ -3,6 +3,7 @@ package com.calendarassistant.contract.model;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import com.calendarassistant.utils.CustomTimeSlotValidator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,9 +11,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Meeting {
 
   @Valid
+  @NotNull(message = "Organizer is mandatory")
   @JsonProperty("organizer")
   private Employee organizer;
 
+  @NotNull(message = "Meeting Time Slot Is Mandatory")
   @CustomTimeSlotValidator(
       message = "Meeting start date before today or end date before start date")
   @JsonProperty("timeslot")

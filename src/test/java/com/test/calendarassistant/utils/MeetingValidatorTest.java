@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -41,35 +40,122 @@ public class MeetingValidatorTest {
 
   @Test
   public void testStartDateNotBeforeToday() {
-    Meeting meeting = createMeetingBeforeToday("2021-03-16 04:15PM", "2022-03-16 05:15PM");
+    Meeting meeting = createMeetingForDateValidation();
+    TimeSlot timeSlot = getTimeSlot("2021-03-16 04:15PM", "2022-03-16 05:15PM");
+    meeting.setTimeSlot(timeSlot);
     Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
-    Set<String> expected = new HashSet<>();
+    List<String> expected = new ArrayList<>();
     expected.add("Meeting start date before today or end date before start date");
     Assert.assertEquals(expected.size(), actual.size());
     Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
-    for (String message : expected) {
-      Assert.assertEquals(message, it.next().getMessage());
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
     }
   }
 
   @Test
   public void testEndDateNotBeforeStartDate() {
-    Meeting meeting = createMeetingBeforeToday("2022-03-16 04:15PM", "2022-02-16 05:15PM");
+    Meeting meeting = createMeetingForDateValidation();
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 04:15PM", "2022-02-16 05:15PM");
+    meeting.setTimeSlot(timeSlot);
     Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
-    Set<String> expected = new HashSet<>();
+    List<String> expected = new ArrayList<>();
     expected.add("Meeting start date before today or end date before start date");
     Assert.assertEquals(expected.size(), actual.size());
     Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
-    for (String message : expected) {
-      Assert.assertEquals(message, it.next().getMessage());
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
     }
   }
 
-  private Meeting createMeetingBeforeToday(String start, String end) {
-    TimeSlot timeSlot = getTimeSlot(start, end);
+  @Test
+  public void testTimeSlotCanNotBeNull() {
+    Meeting meeting = createMeetingForDateValidation();
+    TimeSlot timeSlot = null;
+    meeting.setTimeSlot(timeSlot);
+    Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
+    List<String> expected = new ArrayList<>();
+    expected.add("Meeting Time Slot Is Mandatory");
+    expected.add("Meeting start date before today or end date before start date");
+    Assert.assertEquals(expected.size(), actual.size());
+    Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
+    }
+  }
+
+  @Test
+  public void testOrganizerNameCanNotBeEmpty() {
+    Employee organizer = createEmployeeWithNameConstraint("");
+    Meeting meeting = createMeetingForOrganizerValidation();
+    meeting.setOrganizer(organizer);
+    Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
+    List<String> expected = new ArrayList<>();
+    expected.add("Name is required");
+    Assert.assertEquals(expected.size(), actual.size());
+    Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
+    }
+  }
+
+  @Test
+  public void testOrganizerNameCanNotBeWhiteSpaces() {
+    Employee organizer = createEmployeeWithNameConstraint("     ");
+    Meeting meeting = createMeetingForOrganizerValidation();
+    meeting.setOrganizer(organizer);
+    Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
+    List<String> expected = new ArrayList<>();
+    expected.add("Name is required");
+    Assert.assertEquals(expected.size(), actual.size());
+    Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
+    }
+  }
+
+  @Test
+  public void testOrganizerNameCanNotBeNull() {
+    Employee organizer = createEmployeeWithNameConstraint(null);
+    Meeting meeting = createMeetingForOrganizerValidation();
+    meeting.setOrganizer(organizer);
+    Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
+    List<String> expected = new ArrayList<>();
+    expected.add("Name is required");
+    expected.add("Name is required");
+    Assert.assertEquals(expected.size(), actual.size());
+    Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
+    }
+  }
+
+  @Test
+  public void testOrganizerCanNotBeNull() {
+    Employee organizer = null;
+    Meeting meeting = createMeetingForOrganizerValidation();
+    meeting.setOrganizer(organizer);
+    Set<ConstraintViolation<Meeting>> actual = validator.validate(meeting);
+    List<String> expected = new ArrayList<>();
+    expected.add("Organizer is mandatory");
+    Assert.assertEquals(expected.size(), actual.size());
+    Iterator<ConstraintViolation<Meeting>> it = actual.iterator();
+    while (it.hasNext()) {
+      Assert.assertTrue(expected.contains(it.next().getMessage()));
+    }
+  }
+
+  private Meeting createMeetingForOrganizerValidation() {
+    TimeSlot timeSlot = getTimeSlot("2022-03-16 04:15PM", "2022-03-16 05:15PM");
+    Meeting meeting = new Meeting();
+    meeting.setEmployees(createEmployeeList());
+    meeting.setTimeSlot(timeSlot);
+    return meeting;
+  }
+
+  private Meeting createMeetingForDateValidation() {
     Meeting meeting = new Meeting();
     meeting.setOrganizer(createDeveloperEmployee());
-    meeting.setTimeSlot(timeSlot);
     meeting.setEmployees(createEmployeeList());
     return meeting;
   }
@@ -77,6 +163,13 @@ public class MeetingValidatorTest {
   private Employee createDeveloperEmployee() {
     Employee employee = new Employee();
     employee.setFullName("Developer");
+    employee.setRank("Developer");
+    return employee;
+  }
+
+  private Employee createEmployeeWithNameConstraint(String name) {
+    Employee employee = new Employee();
+    employee.setFullName(name);
     employee.setRank("Developer");
     return employee;
   }

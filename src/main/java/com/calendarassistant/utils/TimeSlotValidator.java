@@ -13,6 +13,9 @@ public class TimeSlotValidator implements ConstraintValidator<CustomTimeSlotVali
 
   @Override
   public boolean isValid(TimeSlot value, ConstraintValidatorContext context) {
+    if (value == null) {
+      return false;
+    }
     Date meetingStart = value.getMeetingStartDateTime();
     Date meetingEnd = value.getMeetingEndDateTime();
     if (meetingStart == null || meetingEnd == null) {
