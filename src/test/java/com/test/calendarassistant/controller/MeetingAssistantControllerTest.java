@@ -25,6 +25,10 @@ import com.calendarassistant.contract.model.TimeSlot;
 import com.calendarassistant.controller.MeetingAssistantController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/*
+ * This test case class is not working. Did some research but could find anything.
+ */
+
 @WebMvcTest(controllers = MeetingAssistantController.class)
 public class MeetingAssistantControllerTest {
   @Autowired private MockMvc mockMvc;
